@@ -37,6 +37,7 @@ export const MISSING_TRANSLATION_STRATEGY = new InjectionToken<MissingTranslatio
 export class I18n {
   constructor(
     @Inject(TRANSLATIONS_FORMAT) format: string,
+    @Optional()
     @Inject(TRANSLATIONS) translations: string,
     @Inject(LOCALE_ID) locale: string,
     @Optional()
@@ -68,18 +69,19 @@ export class I18n {
     }
     const htmlParser = new HtmlParser();
 
-    const translationsBundle = TranslationBundle.load(
+    const translationsBundle = translations ? TranslationBundle.load(
       translations,
       "i18n",
       digest,
       createMapper,
       loadFct,
       missingTranslationStrategy
-    );
+    ) : undefined;
 
     // todo use interpolation config
     return (def: string | I18nDef, params: {[key: string]: any} = {}) => {
       const content = typeof def === "string" ? def : def.value;
+      if (!translations) return content;
       const metadata = {};
       if (typeof def === "object") {
         metadata["id"] = def.id;
